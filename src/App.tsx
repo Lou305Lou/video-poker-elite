@@ -1366,7 +1366,32 @@ return (
         <StatCard icon="🧠" label="Weakness" value={weaknessDrillCount} />
       </div>
 
-      <div className="elite-dashboard-layout">
+      <div className="visual-shell-grid">
+  <aside className="left-rail">
+    <div className="jackpot-card">
+      <div className="visual-feature-title">Weakness Trainer</div>
+      <div className="visual-feature-text">Drill the hands you need most.</div>
+      <div className="jackpot-number">777</div>
+    </div>
+
+    <div className="visual-feature">
+      <div className="visual-feature-title">Train Smarter</div>
+      <div className="visual-feature-text">Adaptive drills focus on your weaknesses.</div>
+    </div>
+
+    <div className="visual-feature">
+      <div className="visual-feature-title">Spaced Repetition</div>
+      <div className="visual-feature-text">Hard rules come back more often.</div>
+    </div>
+
+    <div className="visual-feature">
+      <div className="visual-feature-title">Performance Tracking</div>
+      <div className="visual-feature-text">Track speed, accuracy, streaks, and leaks.</div>
+    </div>
+  </aside>
+
+  <main>
+    <div className="elite-dashboard-layout">
         <div className="elite-left-column">
           <DashboardPanel title="Current Hand" className="current-hand-panel">
             <p className="panel-subtitle" style={{ textAlign: 'center' }}>
@@ -1507,7 +1532,40 @@ return (
                 return <p key={level}>{level}: {pct}% ({stats.correct}/{stats.attempts}) | Avg: {avgTime}s | Best: {bestTime}s</p>
               })
             )}
+<h3 className="panel-subtitle">Mastery Pulse</h3>
 
+{(() => {
+  const totalRules = Object.keys(mistakes).length
+  const needsWork = Object.keys(mistakes).filter((rule) =>
+    ruleMasteryLabel(rule).includes('Needs Work')
+  ).length
+
+  const improving = Object.keys(mistakes).filter((rule) =>
+    ruleMasteryLabel(rule).includes('Improving')
+  ).length
+
+  const mastered = Object.keys(mistakes).filter((rule) =>
+    ruleMasteryLabel(rule).includes('Mastered')
+  ).length
+
+  const masteredPct =
+    totalRules > 0 ? Math.round((mastered / totalRules) * 100) : 0
+
+  return (
+    <>
+      <p>Mastered: {mastered}</p>
+      <div className="mastery-bar-wrap">
+        <div
+          className="mastery-bar mastery-green"
+          style={{ width: `${masteredPct}%` }}
+        />
+      </div>
+
+      <p>Improving: {improving}</p>
+      <p>Needs Work: {needsWork}</p>
+    </>
+  )
+})()}
             <h3 className="panel-subtitle">Most Missed Rules</h3>
             {Object.keys(mistakes).length === 0 ? (
               <p>No mistakes tracked yet.</p>
@@ -1519,6 +1577,55 @@ return (
               ))
             )}
           </DashboardPanel>
+        </div>
+          </div>
+  </main>
+
+  <aside className="right-rail">
+    <div className="visual-feature quote-panel">
+      <div className="quote-text">
+        “The more you practice, the sharper you play.”
+      </div>
+    </div>
+
+    <div className="visual-feature winner-panel">
+      <div className="visual-feature-title">Built for Winners</div>
+      <div className="visual-feature-text">
+        Confidence. Consistency. Smarter hands.
+      </div>
+    </div>
+  </aside>
+</div>
+
+      <div className="bottom-benefits-row">
+        <div className="bottom-benefit-card">
+          <div className="bottom-benefit-icon">🎯</div>
+          <div className="bottom-benefit-title">Adaptive Training</div>
+          <div className="bottom-benefit-subtitle">Focus where it matters.</div>
+        </div>
+
+        <div className="bottom-benefit-card">
+          <div className="bottom-benefit-icon">🧠</div>
+          <div className="bottom-benefit-title">Master Strategy</div>
+          <div className="bottom-benefit-subtitle">Learn. Review. Retain.</div>
+        </div>
+
+        <div className="bottom-benefit-card">
+          <div className="bottom-benefit-icon">📊</div>
+          <div className="bottom-benefit-title">Track Everything</div>
+          <div className="bottom-benefit-subtitle">Data-driven improvement.</div>
+        </div>
+
+        <div className="bottom-benefit-card">
+          <div className="bottom-benefit-icon">⚡</div>
+          <div className="bottom-benefit-title">Improve Faster</div>
+          <div className="bottom-benefit-subtitle">Smarter reps. Better results.</div>
+        </div>
+
+        <div className="bottom-benefit-card">
+          <div className="bottom-benefit-icon">🏆</div>
+          <div className="bottom-benefit-title">Win More Hands</div>
+          <div className="bottom-benefit-subtitle">Confidence through practice.</div>
         </div>
       </div>
     </div>
