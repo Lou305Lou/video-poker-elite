@@ -730,6 +730,60 @@ function StatCard({
   )
 }
 
+function VegasHeader() {
+  const royalCards = ['A♠', 'K♠', 'Q♠', 'J♠', 'T♠']
+  const neonSuits = ['♠', '♥', '♦', '♣']
+
+  return (
+    <header className="elite-header">
+      <div className="header-copy">
+        <div className="header-kicker">Video Poker Tutorial</div>
+        <h1 className="elite-title">VIDEO POKER ELITE</h1>
+        <h2 className="elite-subtitle">Adaptive Mastery Trainer</h2>
+        <div className="elite-tagline">Practice • Learn • Master • Win</div>
+      </div>
+
+      <div className="royal-art" aria-label="Royal flush artwork placeholder">
+        <div className="royal-art-label">Royal Flush</div>
+        <div className="neon-suit-strip" aria-hidden="true">
+          {neonSuits.map((suit) => (
+            <span key={suit}>{suit}</span>
+          ))}
+        </div>
+        <div className="royal-card-fan">
+          {royalCards.map((card, index) => (
+            <div key={card} className="royal-card" style={{ '--card-index': index } as React.CSSProperties}>
+              {card}
+            </div>
+          ))}
+        </div>
+      </div>
+    </header>
+  )
+}
+
+function SidebarPanel({
+  icon,
+  title,
+  children,
+  className = '',
+}: {
+  icon: string
+  title: string
+  children: React.ReactNode
+  className?: string
+}) {
+  return (
+    <section className={`sidebar-panel ${className}`}>
+      <div className="sidebar-icon">{icon}</div>
+      <div>
+        <h3>{title}</h3>
+        <div className="sidebar-copy">{children}</div>
+      </div>
+    </section>
+  )
+}
+
 function App() {
   const [variant, setVariant] = useState('Jacks or Better')
   const [hand, setHand] = useState<Card[]>(dealHand)
@@ -1340,22 +1394,38 @@ function changeVariant(next: string) {
   setShowAnswer(false)
 }
 
+const topMistakes = Object.entries(mistakes).sort((a, b) => b[1] - a[1]).slice(0, 5)
+const totalRules = Object.keys(mistakes).length
+const needsWork = Object.keys(mistakes).filter((rule) =>
+  ruleMasteryLabel(rule).includes('Needs Work')
+).length
+const improving = Object.keys(mistakes).filter((rule) =>
+  ruleMasteryLabel(rule).includes('Improving')
+).length
+const mastered = Object.keys(mistakes).filter((rule) =>
+  ruleMasteryLabel(rule).includes('Mastered')
+).length
+const masteredPct = totalRules > 0 ? Math.round((mastered / totalRules) * 100) : 0
+const improvingPct = totalRules > 0 ? Math.round((improving / totalRules) * 100) : 0
+const needsWorkPct = totalRules > 0 ? Math.round((needsWork / totalRules) * 100) : 0
+const highestSrRule = topMistakes
+  .map(([rule]) => rule)
+  .sort((ruleA, ruleB) => spacedRepetitionScore(ruleB) - spacedRepetitionScore(ruleA))[0]
+const totalDifficultySeconds = Object.values(difficultyStats).reduce(
+  (sum, stats) => sum + stats.totalSeconds,
+  0
+)
+const totalDifficultyAttempts = Object.values(difficultyStats).reduce(
+  (sum, stats) => sum + stats.attempts,
+  0
+)
+const averageHandTime =
+  totalDifficultyAttempts > 0 ? `${(totalDifficultySeconds / totalDifficultyAttempts).toFixed(1)}s` : '--'
+
 return (
   <div className="app-shell">
     <div className="elite-container">
-      <header className="elite-header">
-        <h1 className="elite-title">VIDEO POKER ELITE</h1>
-        <h2 className="elite-subtitle">Adaptive Mastery Trainer</h2>
-        <div className="elite-tagline">Practice • Learn • Master • Win</div>
-      </header>
-
-      <DashboardPanel title="Video Poker Variant" className="variant-panel">
-        <select value={variant} onChange={(e) => changeVariant(e.target.value)} className="neon-select">
-          {variants.map((game) => (
-            <option key={game}>{game}</option>
-          ))}
-        </select>
-      </DashboardPanel>
+      <VegasHeader />
 
       <div className="stat-row">
         <StatCard icon="🎯" label="Attempts" value={attempts} />
@@ -1363,40 +1433,41 @@ return (
         <StatCard icon="📈" label="Accuracy" value={`${accuracy}%`} />
         <StatCard icon="🔥" label="Streak" value={currentStreak} />
         <StatCard icon="🏆" label="Best" value={bestStreak} />
-        <StatCard icon="🧠" label="Weakness" value={weaknessDrillCount} />
+        <StatCard icon="⏱" label="Avg Time" value={averageHandTime} />
       </div>
 
-      <div className="visual-shell-grid">
-  <aside className="left-rail">
-    <div className="jackpot-card">
-      <div className="visual-feature-title">Weakness Trainer</div>
-      <div className="visual-feature-text">Drill the hands you need most.</div>
-      <div className="jackpot-number">777</div>
-    </div>
+      <div className="dashboard-grid">
+        <aside className="left-sidebar">
+          <DashboardPanel title="Video Poker Variant" className="variant-panel">
+            <select value={variant} onChange={(e) => changeVariant(e.target.value)} className="neon-select">
+              {variants.map((game) => (
+                <option key={game}>{game}</option>
+              ))}
+            </select>
+          </DashboardPanel>
 
-    <div className="visual-feature">
-      <div className="visual-feature-title">Train Smarter</div>
-      <div className="visual-feature-text">Adaptive drills focus on your weaknesses.</div>
-    </div>
+          <SidebarPanel icon="🎯" title="Train Smarter">
+            Adaptive drills keep your practice centered on the rules that cost you hands.
+          </SidebarPanel>
 
-    <div className="visual-feature">
-      <div className="visual-feature-title">Spaced Repetition</div>
-      <div className="visual-feature-text">Hard rules come back more often.</div>
-    </div>
+          <SidebarPanel icon="🧠" title="Weakness Trainer" className="hot-panel">
+            <p>{weaknessMessage || 'Miss a rule, then drill it until it sticks.'}</p>
+            <button onClick={loadWeaknessHand} className="neon-button purple">Train My Weakness</button>
+          </SidebarPanel>
 
-    <div className="visual-feature">
-      <div className="visual-feature-title">Performance Tracking</div>
-      <div className="visual-feature-text">Track speed, accuracy, streaks, and leaks.</div>
-    </div>
-  </aside>
+          <SidebarPanel icon="📊" title="Feature Icons">
+            <div className="feature-icon-grid">
+              <span><strong>♠</strong> Speed</span>
+              <span><strong>♥</strong> Focus</span>
+              <span><strong>♦</strong> Recall</span>
+              <span><strong>♣</strong> Mastery</span>
+            </div>
+          </SidebarPanel>
+        </aside>
 
-  <main>
-    <div className="elite-dashboard-layout">
-        <div className="elite-left-column">
+        <main className="center-stage">
           <DashboardPanel title="Current Hand" className="current-hand-panel">
-            <p className="panel-subtitle" style={{ textAlign: 'center' }}>
-              Tap the cards you would hold
-            </p>
+            <p className="panel-subtitle center-text">Tap the cards you would hold</p>
 
             <div className="card-row">
               {hand.map((card) => {
@@ -1424,7 +1495,6 @@ return (
                 Grade My Hold
               </button>
               <button onClick={nextHand} className="neon-button">Next Hand</button>
-              <button onClick={loadWeaknessHand} className="neon-button purple">Train My Weakness</button>
               <button onClick={() => trainFocusLevel('Medium')} className="neon-button">Train Medium</button>
               <button onClick={() => trainFocusLevel('Sharp')} className="neon-button">Train Sharp</button>
               <button onClick={() => trainFocusLevel('Expert')} className="neon-button">Train Expert</button>
@@ -1459,36 +1529,70 @@ return (
               )}
             </DashboardPanel>
           )}
-        </div>
 
-        <div className="elite-right-column">
-          <DashboardPanel title="Training Command Center">
-            <label>
-              <input type="checkbox" checked={autoWeaknessMode} onChange={(e) => setAutoWeaknessMode(e.target.checked)} /> Auto Weakness Training
-            </label>
+          <div className="center-panel-grid">
+            <DashboardPanel title="Mastery Dashboard">
+              <div className="mastery-bars">
+                <div className="progress-row">
+                  <div className="progress-label">
+                    <span>Mastered</span>
+                    <strong>{masteredPct}%</strong>
+                  </div>
+                  <div className="mastery-bar-wrap">
+                    <div className="mastery-bar mastery-green" style={{ width: `${masteredPct}%` }} />
+                  </div>
+                </div>
+                <div className="progress-row">
+                  <div className="progress-label">
+                    <span>Improving</span>
+                    <strong>{improvingPct}%</strong>
+                  </div>
+                  <div className="mastery-bar-wrap">
+                    <div className="mastery-bar mastery-yellow" style={{ width: `${improvingPct}%` }} />
+                  </div>
+                </div>
+                <div className="progress-row">
+                  <div className="progress-label">
+                    <span>Needs Work</span>
+                    <strong>{needsWorkPct}%</strong>
+                  </div>
+                  <div className="mastery-bar-wrap">
+                    <div className="mastery-bar mastery-red" style={{ width: `${needsWorkPct}%` }} />
+                  </div>
+                </div>
+              </div>
+              <div className="mini-stat-grid">
+                <StatCard label="Mastered" value={mastered} />
+                <StatCard label="Improving" value={improving} />
+                <StatCard label="Needs Work" value={needsWork} />
+              </div>
+            </DashboardPanel>
 
-            <label style={{ display: 'block', marginTop: '10px' }}>
-              Weakness Focus:
-              <select value={weaknessFocusLevel} onChange={(e) => setWeaknessFocusLevel(e.target.value)} className="neon-select">
-                <option>All</option>
-                <option>Easy</option>
-                <option>Medium</option>
-                <option>Sharp</option>
-                <option>Expert</option>
-              </select>
-            </label>
+            <DashboardPanel title="Top Mistakes">
+              {topMistakes.length === 0 ? (
+                <p>No mistakes tracked yet.</p>
+              ) : (
+                topMistakes.map(([rule, count]) => (
+                  <p key={rule} className="mistake-row">
+                    <strong>{ruleLabels[rule] || rule}</strong>
+                    <span>{count} miss{count === 1 ? '' : 'es'} | SR {spacedRepetitionScore(rule)}</span>
+                  </p>
+                ))
+              )}
+            </DashboardPanel>
+          </div>
+        </main>
 
-            <p style={{ color: '#c4b5fd', fontWeight: 'bold' }}>Weakness Focus: {weaknessFocusLevel}</p>
-
-            <label>
-              <input type="checkbox" checked={focusCycleMode} onChange={(e) => setFocusCycleMode(e.target.checked)} /> Smart Focus Cycling Mode
-            </label>
-
-            {focusCycleMode && <p style={{ color: '#f9a8d4', fontWeight: 'bold' }}>Next Focus Cycle: {nextFocusCycleLabel()}</p>}
-            {weaknessMessage && <p style={{ color: '#93c5fd', fontWeight: 'bold' }}>{weaknessMessage}</p>}
+        <aside className="right-sidebar">
+          <DashboardPanel title="Last Broken Streak">
+            <p>{lastBrokenStreakSummary || 'No broken streak recorded yet.'}</p>
             {lastHandSeconds !== null && <p>Last Hand Time: {lastHandSeconds.toFixed(1)}s</p>}
+          </DashboardPanel>
 
-            <div className="button-row">
+          <DashboardPanel title="Export Panel">
+            <div className="button-row vertical-buttons">
+              <button onClick={exportTrainingStats} className="neon-button">Export JSON</button>
+              <button onClick={exportTrainingStatsCsv} className="neon-button green">Export CSV</button>
               <button
                 onClick={() => {
                   setAttempts(0)
@@ -1511,122 +1615,81 @@ return (
               >
                 Reset Stats
               </button>
-              <button onClick={exportTrainingStats} className="neon-button">Export JSON</button>
-              <button onClick={exportTrainingStatsCsv} className="neon-button green">Export CSV</button>
             </div>
           </DashboardPanel>
 
-          <DashboardPanel title="Analytics Dashboard">
-            <h3 className="panel-subtitle">Accuracy by Difficulty</h3>
+          <SidebarPanel icon="💬" title="Practice Edge" className="quote-panel">
+            <span className="quote-mark">“</span>
+            The more you practice, the sharper you play.
+          </SidebarPanel>
 
-            {Object.keys(difficultyStats).length === 0 ? (
-              <p>No difficulty stats yet.</p>
-            ) : (
-              ['Easy', 'Medium', 'Sharp', 'Expert'].map((level) => {
-                const stats = difficultyStats[level]
-                if (!stats) return null
-                const pct = stats.attempts > 0 ? ((stats.correct / stats.attempts) * 100).toFixed(1) : '0.0'
-                const avgTime = stats.attempts > 0 ? (stats.totalSeconds / stats.attempts).toFixed(1) : '0.0'
-                const bestTime = stats.bestCorrectSeconds !== null ? stats.bestCorrectSeconds.toFixed(1) : '--'
-
-                return <p key={level}>{level}: {pct}% ({stats.correct}/{stats.attempts}) | Avg: {avgTime}s | Best: {bestTime}s</p>
-              })
-            )}
-<h3 className="panel-subtitle">Mastery Pulse</h3>
-
-{(() => {
-  const totalRules = Object.keys(mistakes).length
-  const needsWork = Object.keys(mistakes).filter((rule) =>
-    ruleMasteryLabel(rule).includes('Needs Work')
-  ).length
-
-  const improving = Object.keys(mistakes).filter((rule) =>
-    ruleMasteryLabel(rule).includes('Improving')
-  ).length
-
-  const mastered = Object.keys(mistakes).filter((rule) =>
-    ruleMasteryLabel(rule).includes('Mastered')
-  ).length
-
-  const masteredPct =
-    totalRules > 0 ? Math.round((mastered / totalRules) * 100) : 0
-
-  return (
-    <>
-      <p>Mastered: {mastered}</p>
-      <div className="mastery-bar-wrap">
-        <div
-          className="mastery-bar mastery-green"
-          style={{ width: `${masteredPct}%` }}
-        />
+          <SidebarPanel icon="🏆" title="Built For Winners" className="winner-panel">
+            Confidence. Consistency. Smarter hands.
+          </SidebarPanel>
+        </aside>
       </div>
 
-      <p>Improving: {improving}</p>
-      <p>Needs Work: {needsWork}</p>
-    </>
-  )
-})()}
-            <h3 className="panel-subtitle">Most Missed Rules</h3>
-            {Object.keys(mistakes).length === 0 ? (
-              <p>No mistakes tracked yet.</p>
-            ) : (
-              Object.entries(mistakes).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([rule, count]) => (
-                <p key={rule}>
-                  {ruleLabels[rule] || rule}: {count} miss{count === 1 ? '' : 'es'} | SR Score: {spacedRepetitionScore(rule)} | {ruleMasteryLabel(rule)}
-                </p>
-              ))
-            )}
-          </DashboardPanel>
-        </div>
-          </div>
-  </main>
+      <div className="lower-dashboard-grid">
+        <DashboardPanel title="Difficulty Performance">
+          {Object.keys(difficultyStats).length === 0 ? (
+            <p>No difficulty stats yet.</p>
+          ) : (
+            ['Easy', 'Medium', 'Sharp', 'Expert'].map((level) => {
+              const stats = difficultyStats[level]
+              if (!stats) return null
+              const pct = stats.attempts > 0 ? ((stats.correct / stats.attempts) * 100).toFixed(1) : '0.0'
+              const avgTime = stats.attempts > 0 ? (stats.totalSeconds / stats.attempts).toFixed(1) : '0.0'
+              const bestTime = stats.bestCorrectSeconds !== null ? stats.bestCorrectSeconds.toFixed(1) : '--'
 
-  <aside className="right-rail">
-    <div className="visual-feature quote-panel">
-      <div className="quote-text">
-        “The more you practice, the sharper you play.”
-      </div>
-    </div>
+              return (
+                <div key={level} className="difficulty-row">
+                  <div className="progress-label">
+                    <span>{level}</span>
+                    <strong>{pct}%</strong>
+                  </div>
+                  <div className="mastery-bar-wrap">
+                    <div className={`mastery-bar difficulty-${level.toLowerCase()}`} style={{ width: `${pct}%` }} />
+                  </div>
+                  <p>{stats.correct}/{stats.attempts} | Avg: {avgTime}s | Best: {bestTime}s</p>
+                </div>
+              )
+            })
+          )}
+        </DashboardPanel>
 
-    <div className="visual-feature winner-panel">
-      <div className="visual-feature-title">Built for Winners</div>
-      <div className="visual-feature-text">
-        Confidence. Consistency. Smarter hands.
-      </div>
-    </div>
-  </aside>
-</div>
+        <DashboardPanel title="Focus Cycle">
+          <label className="toggle-row">
+            <input type="checkbox" checked={autoWeaknessMode} onChange={(e) => setAutoWeaknessMode(e.target.checked)} /> Auto Weakness Training
+          </label>
 
-      <div className="bottom-benefits-row">
-        <div className="bottom-benefit-card">
-          <div className="bottom-benefit-icon">🎯</div>
-          <div className="bottom-benefit-title">Adaptive Training</div>
-          <div className="bottom-benefit-subtitle">Focus where it matters.</div>
-        </div>
+          <label className="field-label">
+            Weakness Focus
+            <select value={weaknessFocusLevel} onChange={(e) => setWeaknessFocusLevel(e.target.value)} className="neon-select">
+              <option>All</option>
+              <option>Easy</option>
+              <option>Medium</option>
+              <option>Sharp</option>
+              <option>Expert</option>
+            </select>
+          </label>
 
-        <div className="bottom-benefit-card">
-          <div className="bottom-benefit-icon">🧠</div>
-          <div className="bottom-benefit-title">Master Strategy</div>
-          <div className="bottom-benefit-subtitle">Learn. Review. Retain.</div>
-        </div>
+          <label className="toggle-row">
+            <input type="checkbox" checked={focusCycleMode} onChange={(e) => setFocusCycleMode(e.target.checked)} /> Smart Focus Cycling Mode
+          </label>
+          <p>Next Focus Cycle: {nextFocusCycleLabel()}</p>
+        </DashboardPanel>
 
-        <div className="bottom-benefit-card">
-          <div className="bottom-benefit-icon">📊</div>
-          <div className="bottom-benefit-title">Track Everything</div>
-          <div className="bottom-benefit-subtitle">Data-driven improvement.</div>
-        </div>
-
-        <div className="bottom-benefit-card">
-          <div className="bottom-benefit-icon">⚡</div>
-          <div className="bottom-benefit-title">Improve Faster</div>
-          <div className="bottom-benefit-subtitle">Smarter reps. Better results.</div>
-        </div>
-
-        <div className="bottom-benefit-card">
-          <div className="bottom-benefit-icon">🏆</div>
-          <div className="bottom-benefit-title">Win More Hands</div>
-          <div className="bottom-benefit-subtitle">Confidence through practice.</div>
-        </div>
+        <DashboardPanel title="Spaced Repetition Score">
+          {highestSrRule ? (
+            <>
+              <p><strong>Priority Rule:</strong> {ruleLabels[highestSrRule] || highestSrRule}</p>
+              <p><strong>SR Score:</strong> {spacedRepetitionScore(highestSrRule)}</p>
+              <p><strong>Mastery:</strong> {ruleMasteryLabel(highestSrRule)}</p>
+            </>
+          ) : (
+            <p>No spaced repetition score yet.</p>
+          )}
+        </DashboardPanel>
       </div>
     </div>
   </div>
