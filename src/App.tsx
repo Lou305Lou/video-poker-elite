@@ -731,8 +731,9 @@ function StatCard({
 }
 
 function VegasHeader() {
-  const royalCards = ['A♠', 'K♠', 'Q♠', 'J♠', 'T♠']
+  const royalCards = ['A♥', 'K♥', 'Q♥', 'J♥', '10♥']
   const neonSuits = ['♠', '♥', '♦', '♣']
+  const chips = ['100', '25', '500']
 
   return (
     <header className="elite-header">
@@ -750,6 +751,13 @@ function VegasHeader() {
             <span key={suit}>{suit}</span>
           ))}
         </div>
+        <div className="chip-stack" aria-hidden="true">
+          {chips.map((chip, index) => (
+            <span key={chip} style={{ '--chip-index': index } as React.CSSProperties}>
+              {chip}
+            </span>
+          ))}
+        </div>
         <div className="royal-card-fan">
           {royalCards.map((card, index) => (
             <div key={card} className="royal-card" style={{ '--card-index': index } as React.CSSProperties}>
@@ -759,6 +767,26 @@ function VegasHeader() {
         </div>
       </div>
     </header>
+  )
+}
+
+function JackpotMachineCard() {
+  return (
+    <section className="jackpot-machine-card">
+      <div className="machine-top">Jackpot Drill</div>
+      <div className="machine-reels" aria-hidden="true">
+        <span>7</span>
+        <span>7</span>
+        <span>7</span>
+      </div>
+      <div className="machine-lights" aria-hidden="true">
+        <span />
+        <span />
+        <span />
+        <span />
+      </div>
+      <p>Turn misses into high-value reps.</p>
+    </section>
   )
 }
 
@@ -1411,6 +1439,10 @@ const needsWorkPct = totalRules > 0 ? Math.round((needsWork / totalRules) * 100)
 const highestSrRule = topMistakes
   .map(([rule]) => rule)
   .sort((ruleA, ruleB) => spacedRepetitionScore(ruleB) - spacedRepetitionScore(ruleA))[0]
+const focusCycleLevels = ['Medium', 'Sharp', 'Expert']
+const currentCycleLabel =
+  focusCycleIndex === 0 ? 'Ready' : focusCycleLevels[(focusCycleIndex - 1) % focusCycleLevels.length]
+const upcomingCycleLabel = nextFocusCycleLabel()
 const totalDifficultySeconds = Object.values(difficultyStats).reduce(
   (sum, stats) => sum + stats.totalSeconds,
   0
@@ -1445,6 +1477,8 @@ return (
               ))}
             </select>
           </DashboardPanel>
+
+          <JackpotMachineCard />
 
           <SidebarPanel icon="🎯" title="Train Smarter">
             Adaptive drills keep your practice centered on the rules that cost you hands.
@@ -1658,6 +1692,17 @@ return (
         </DashboardPanel>
 
         <DashboardPanel title="Focus Cycle">
+          <div className="cycle-grid">
+            <div>
+              <span>Current Cycle</span>
+              <strong>{currentCycleLabel}</strong>
+            </div>
+            <div>
+              <span>Next Cycle</span>
+              <strong>{upcomingCycleLabel}</strong>
+            </div>
+          </div>
+
           <label className="toggle-row">
             <input type="checkbox" checked={autoWeaknessMode} onChange={(e) => setAutoWeaknessMode(e.target.checked)} /> Auto Weakness Training
           </label>
@@ -1676,7 +1721,7 @@ return (
           <label className="toggle-row">
             <input type="checkbox" checked={focusCycleMode} onChange={(e) => setFocusCycleMode(e.target.checked)} /> Smart Focus Cycling Mode
           </label>
-          <p>Next Focus Cycle: {nextFocusCycleLabel()}</p>
+          <button onClick={trainNextFocusCycle} className="neon-button orange">Train Next Cycle</button>
         </DashboardPanel>
 
         <DashboardPanel title="Spaced Repetition Score">
