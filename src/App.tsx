@@ -737,10 +737,22 @@ function VegasHeader() {
 
   return (
     <header className="elite-header">
+      <div className="header-promo-card">
+        <div className="promo-trophy">🏆</div>
+        <div>
+          <strong>Master Every Hand.</strong>
+          <span>Beat the Game.</span>
+        </div>
+        <div className="promo-suits" aria-hidden="true">
+          {neonSuits.map((suit) => (
+            <span key={suit}>{suit}</span>
+          ))}
+        </div>
+      </div>
+
       <div className="header-copy">
-        <div className="header-kicker">Video Poker Tutorial</div>
-        <h1 className="elite-title">VIDEO POKER ELITE</h1>
-        <h2 className="elite-subtitle">Adaptive Mastery Trainer</h2>
+        <h1 className="elite-title">VIDEO POKER</h1>
+        <h2 className="elite-subtitle">TUTORIAL</h2>
         <div className="elite-tagline">Practice • Learn • Master • Win</div>
       </div>
 
@@ -1481,7 +1493,13 @@ return (
           <JackpotMachineCard />
 
           <SidebarPanel icon="🎯" title="Train Smarter">
-            Adaptive drills keep your practice centered on the rules that cost you hands.
+            <div className="trainer-list">
+              <p><strong>Adaptive Drills</strong><span>Focus on your weaknesses</span></p>
+              <p><strong>Spaced Repetition</strong><span>Smarter review over time</span></p>
+              <p><strong>Performance Tracking</strong><span>See your progress</span></p>
+              <p><strong>Timed Challenges</strong><span>Improve your speed</span></p>
+              <p><strong>Export Stats</strong><span>JSON / CSV</span></p>
+            </div>
           </SidebarPanel>
 
           <SidebarPanel icon="🧠" title="Weakness Trainer" className="hot-panel">
@@ -1609,7 +1627,8 @@ return (
                 topMistakes.map(([rule, count]) => (
                   <p key={rule} className="mistake-row">
                     <strong>{ruleLabels[rule] || rule}</strong>
-                    <span>{count} miss{count === 1 ? '' : 'es'} | SR {spacedRepetitionScore(rule)}</span>
+                    <span>{count} miss{count === 1 ? '' : 'es'}</span>
+                    <b>{spacedRepetitionScore(rule)}</b>
                   </p>
                 ))
               )}
@@ -1619,8 +1638,17 @@ return (
 
         <aside className="right-sidebar">
           <DashboardPanel title="Last Broken Streak">
-            <p>{lastBrokenStreakSummary || 'No broken streak recorded yet.'}</p>
-            {lastHandSeconds !== null && <p>Last Hand Time: {lastHandSeconds.toFixed(1)}s</p>}
+            <div className="streak-summary-grid">
+              <span>Streak</span>
+              <strong>{currentStreak}</strong>
+              <span>Avg Time</span>
+              <strong>{averageHandTime}</strong>
+              <span>Last Hand</span>
+              <strong>{lastHandSeconds === null ? '--' : `${lastHandSeconds.toFixed(1)}s`}</strong>
+              <span>Mistakes</span>
+              <strong>{topMistakes.length > 0 ? topMistakes.map(([rule]) => ruleLabels[rule] || rule).slice(0, 2).join(', ') : '--'}</strong>
+            </div>
+            {lastBrokenStreakSummary && <p className="streak-note">{lastBrokenStreakSummary}</p>}
           </DashboardPanel>
 
           <DashboardPanel title="Export Panel">
@@ -1735,6 +1763,14 @@ return (
             <p>No spaced repetition score yet.</p>
           )}
         </DashboardPanel>
+      </div>
+
+      <div className="bottom-benefit-strip">
+        <div><span>🎯</span><strong>Adaptive Training</strong><p>Focus where it matters most.</p></div>
+        <div><span>🧠</span><strong>Master Strategy</strong><p>Learn. Review. Retain.</p></div>
+        <div><span>📊</span><strong>Track Everything</strong><p>Data-driven improvement.</p></div>
+        <div><span>⚡</span><strong>Improve Faster</strong><p>Smarter reps. Better results.</p></div>
+        <div><span>🏆</span><strong>Win More Hands</strong><p>Confidence through practice.</p></div>
       </div>
     </div>
   </div>
